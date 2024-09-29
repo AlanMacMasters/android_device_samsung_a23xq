@@ -54,7 +54,9 @@ BOARD_KERNEL_CMDLINE := \
     loop.max_part=7 \
     iptable_raw.raw_before_defrag=1 \
     ip6table_raw.raw_before_defrag=1 \
-    printk.devkmsg=on
+    printk.devkmsg=on \
+	androidboot.selinux=permissive
+	
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_KERNEL_PAGESIZE := 4096
 BOARD_MKBOOTIMG_ARGS := \
@@ -79,11 +81,6 @@ BOARD_AVB_RECOVERY_KEY_PATH := external/avb/test/data/testkey_rsa4096.pem
 BOARD_AVB_RECOVERY_ALGORITHM := SHA256_RSA4096
 BOARD_AVB_RECOVERY_ROLLBACK_INDEX := 1
 BOARD_AVB_RECOVERY_ROLLBACK_INDEX_LOCATION := 1
-
-# Samsung TS drivers (a23xq)
-TW_LOAD_VENDOR_MODULES := "sec_cmd.ko sec_common_fn.ko sec_secure_touch.ko sec_tclm_v2.ko sec_tsp_dumpkey.ko sec_tsp_log.ko stm_ts.ko"
-TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
-TW_LOAD_VENDOR_BOOT_MODULES := true
 
 # Properties
 TARGET_VENDOR_PROP += $(DEVICE_PATH)/vendor.prop
@@ -121,19 +118,30 @@ TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TARGET_RECOVERY_FSTAB := $(DEVICE_PATH)/recovery.fstab
 RECOVERY_SDCARD_ON_DATA := true
 
+# Kernel module loading for touch, battery etc
+TW_LOAD_VENDOR_MODULES := $(shell echo \"$(shell ls $(DEVICE_PATH)/prebuilt/modules)\")
+#TW_LOAD_VENDOR_MODULES := "novatek_ts_nt36523.ko sec_cmd.ko sec_common_fn.ko sec_secure_touch.ko sec_tsp_log.ko"
+#TW_LOAD_VENDOR_BOOT_MODULES := true
+#TW_LOAD_VENDOR_MODULES_EXCLUDE_GKI := true
+
+BUILD_BROKEN_ELF_PREBUILT_PRODUCT_COPY_FILES := true
+
 # Use mke2fs to create ext4 images
 TARGET_USES_MKE2FS := true
 
 # TWRP specific build flags
 TW_THEME := portrait_hdpi
-TW_SCREEN_BLANK_ON_BOOT := true
+#TW_SCREEN_BLANK_ON_BOOT := true
+# TW_NO_SCREEN_TIMEOUT := true
+TARGET_RECOVERY_QCOM_RTC_FIX := true
+TARGET_RECOVERY_PIXEL_FORMAT := RGBX_8888
 TW_BRIGHTNESS_PATH := "/sys/class/backlight/panel0-backlight/brightness"
-TW_MAX_BRIGHTNESS := 486
-TW_DEFAULT_BRIGHTNESS := 128
+TW_MAX_BRIGHTNESS := 306
+TW_DEFAULT_BRIGHTNESS := 255
+TARGET_USE_CUSTOM_LUN_FILE_PATH := /config/usb_gadget/g1/functions/mass_storage.0/lun.%d/file
 TW_CUSTOM_CPU_TEMP_PATH := "/sys/devices/virtual/thermal/thermal_zone50/temp"
-TW_Y_OFFSET := 89
-TW_H_OFFSET := -89
-TW_NO_REBOOT_BOOTLOADER := true
+TW_Y_OFFSET := 80
+TW_H_OFFSET := -80
 TW_HAS_DOWNLOAD_MODE := true
 TARGET_RECOVERY_QCOM_RTC_FIX := true
 TW_BACKUP_EXCLUSIONS := /data/fonts
@@ -141,6 +149,9 @@ TW_EXTRA_LANGUAGES := true
 TW_EXCLUDE_DEFAULT_USB_INIT := true
 TW_INCLUDE_CRYPTO := true
 TW_INCLUDE_NTFS_3G := true
-TW_INCLUDE_LPDUMP := true
-TW_INCLUDE_LPTOOLS := true
-TW_FRAMERATE := 120
+
+# TWRP Configuration: Logd
+TWRP_EVENT_LOGGING := true
+TWRP_INCLUDE_LOGCAT := true
+TARGET_USES_LOGD := true
+TARGET_USES_LOGD := true
